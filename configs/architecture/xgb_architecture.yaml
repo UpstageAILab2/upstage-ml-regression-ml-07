@@ -1,0 +1,4 @@
+_target_: src.architectures.xgb_architecture.XGBArchitecture
+run_name: ${run_name}
+model_save_path: ${model_save_path}
+result_summary_path: ${result_summary_path}

@@ -1,0 +1,36 @@
+_target_: src.tuners.xgb_tuner.XGBTuner
+hparams:
+  objective: reg:squarederror
+  eval_metric: rmse
+  booster: 
+    - gbtree
+    - gblinear
+    - dart
+  lambda_:
+    low: 0.00000001
+    high: 1.0
+  alpha:
+    low: 0.00000001
+    high: 1.0
+  max_depth:
+    low: 3
+    high: 20
+    log: False
+  eta:
+    low: 0.00000001
+    high: 1.0
+  gamma:
+    low: 0.00000001
+    high: 1.0
+  subsample:
+    low: 0.1
+    high: 1.0
+  colsample_bytree:
+    low: 0.1
+    high: 1.0
+split_size: ${split_size}
+num_folds: ${num_folds}
+num_trials: ${num_trials}
+seed: ${seed}
+tuning_way: ${tuning_way}
+hparams_save_path: ${hparams_save_path}

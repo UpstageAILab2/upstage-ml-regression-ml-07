@@ -1,0 +1,5 @@
+_target_: src.datasets.house_price_dataset.HousePriceDataset
+mode: ${mode}
+dataset_name: ${dataset_name}
+df_path: ${connected_dir}/data
+label_column_name: ${label_column_name}
