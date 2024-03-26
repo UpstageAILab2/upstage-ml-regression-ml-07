@@ -195,6 +195,7 @@ saved_model.pkl
 *.tar
 *.txt
 *.model
+*.png
 *__pycache__
 logs/runs/
 logs/wandb/
