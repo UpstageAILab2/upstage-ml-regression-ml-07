@@ -190,4 +190,16 @@ pyrightconfig.json
 output.csv
 saved_model.pkl
 
+# Additional options
+*.csv
+*.tar
+*.txt
+*.model
+*__pycache__
+logs/runs/
+logs/wandb/
+multirun/
+tmp*
+!requirements.txt
+
 # End
