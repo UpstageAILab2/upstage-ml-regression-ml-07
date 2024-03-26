@@ -194,6 +194,7 @@ saved_model.pkl
 *.csv
 *.tar
 *.txt
+*.json
 *.model
 *.png
 *__pycache__
