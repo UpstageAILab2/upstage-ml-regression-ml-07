@@ -120,6 +120,6 @@ class XGBArchitecture():
             pred = model.predict(data) / len((os.listdir(self.model_save_path)))
             pred_mean += pred
         submission = pd.DataFrame(pred_mean.astype(int), columns=["target"])
-        if not os.path.exists(self.model_save_path):
-            os.makedirs(self.model_save_path)
+        if not os.path.exists(submission_save_path):
+            os.makedirs(submission_save_path)
         submission.to_csv(f"{submission_save_path}/{submission_save_name}.csv", index=False)
