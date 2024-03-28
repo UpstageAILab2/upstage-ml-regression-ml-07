@@ -115,7 +115,7 @@ class XGBArchitecture():
     ) -> None:
         pred_mean = np.zeros((len(data),))
         for model_file in (tqdm(os.listdir(self.model_save_path))):
-            model = xgb.XGBClassifier()
+            model = xgb.XGBRegressor()
             model.load_model(f"{self.model_save_path}/{model_file}")
             pred = model.predict(data) / len((os.listdir(self.model_save_path)))
             pred_mean += pred
