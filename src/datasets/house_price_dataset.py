@@ -27,10 +27,8 @@ class HousePriceDataset():
         return (data, label)
 
     def load_dataset(self) -> pd.DataFrame:
-        if self.mode == "train":
+        if self.mode == "train" or self.mode == "test":
             dataset = pd.read_csv(f"{self.df_path}/{self.dataset_name}_{self.mode}.csv")
-        elif self.mode == "test":
-            dataset = pd.read_csv(f"{self.df_path}/{self.mode}.csv")
         elif self.mode == "tune":
             dataset = pd.read_csv(f"{self.df_path}/{self.dataset_name}_train.csv")
         else:
