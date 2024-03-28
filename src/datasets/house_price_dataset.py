@@ -37,20 +37,6 @@ class HousePriceDataset():
             raise ValueError(f"Invalid execution mode: {self.mode}")
         return dataset
 
-    def preprocess_certain_features(
-        self,
-        dataset: pd.DataFrame,
-    ) -> pd.DataFrame:
-        dataset.columns = [column.replace("㎡", "").replace("'", "").replace('"', "").replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "").replace(",", "") for column in dataset.columns]
-
-        dataset["등기신청일자"] = dataset["등기신청일자"].replace(" ", np.nan)
-        dataset["거래유형"] = dataset["거래유형"].replace("-", np.nan)
-        dataset["중개사소재지"] = dataset["중개사소재지"].replace("-", np.nan)
-
-        dataset["본번"] = dataset["본번"].astype(str)
-        dataset["부번"] = dataset["부번"].astype(str)
-        return dataset
-
     def get_columns_by_types(
         self,
         dataset: pd.DataFrame,
