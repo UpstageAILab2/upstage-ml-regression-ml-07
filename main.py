@@ -4,7 +4,7 @@ import hydra
 from src.pipelines.ml_pipeline import train, test, tune
 
 
-@hydra.main(config_path="configs/", config_name="lightgbm.yaml")
+@hydra.main(config_path="configs/", config_name="lgbm.yaml")
 def main(config: DictConfig,) -> None:
     if config.mode == "train":
         return train(config)
