@@ -5,9 +5,8 @@ defaults:
   - tuner: lgbm_tuner
   - hydra: hydra
 
-package_name: upstage-ml-regression-ml-07
-project_dir: C:/Users/ddang/Desktop/projects/${package_name}
-connected_dir: C:/Users/ddang/Desktop/projects/${package_name}
+project_dir: ${oc.env:PROJECT_DIR}
+connected_dir: ${oc.env:CONNECTED_DIR}
 
 seed: 2024
 
