@@ -1,6 +1,7 @@
 import os
 import json
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -19,22 +20,27 @@ from wandb.xgboost import WandbCallback
 import matplotlib.pyplot as plt
 
 
-class XGBArchitecture():
+class XGBArchitecture:
     def __init__(
         self,
         run_name: str,
         model_save_path: str,
         result_summary_path: str,
+        wandb_project: str,
+        wandb_entity: str,
     ) -> None:
         self.run_name = run_name
         self.model_save_path = model_save_path
         self.result_summary_path = result_summary_path
 
+        self.wandb_project = wandb_project
+        self.wandb_entity = wandb_entity
+
     def train(
-        self, 
+        self,
         data: pd.DataFrame,
         label: pd.Series,
-        num_folds: int, 
+        num_folds: int,
         seed: int,
         is_tuned: bool,
         hparams_save_path: str,
@@ -42,7 +48,9 @@ class XGBArchitecture():
     ) -> None:
         kf = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=seed)
         if is_tuned == "tuned":
-            params = json.load(open(f"{hparams_save_path}/best_params.json", "rt", encoding="UTF-8"))
+            params = json.load(
+                open(f"{hparams_save_path}/best_params.json", "rt", encoding="UTF-8")
+            )
             params["verbose"] = -1
         elif is_tuned == "untuned":
             params = {
@@ -53,7 +61,9 @@ class XGBArchitecture():
         else:
             raise ValueError(f"Invalid is_tuned argument: {is_tuned}")
 
-        wandb.init(project="UpStageHousePrice", entity="DimensionSTP", name=self.run_name)
+        wandb.init(
+            project=self.wandb_project, entity=self.wandb_entity, name=self.run_name
+        )
 
         model = xgb.XGBRegressor(**params, random_state=seed)
 
@@ -62,7 +72,9 @@ class XGBArchitecture():
             train_data, train_label = data.loc[idx[0]], label.loc[idx[0]]
             val_data, val_label = data.loc[idx[1]], label.loc[idx[1]]
 
-            model.fit(train_data, train_label, callbacks=[WandbCallback(log_model=True)])
+            model.fit(
+                train_data, train_label, callbacks=[WandbCallback(log_model=True)]
+            )
 
             if not os.path.exists(self.model_save_path):
                 os.makedirs(self.model_save_path)
@@ -88,33 +100,35 @@ class XGBArchitecture():
         result_file = f"{self.result_summary_path}/result_summary.csv"
         if os.path.isfile(result_file):
             original_result_df = pd.read_csv(result_file)
-            new_result_df = pd.concat([original_result_df, result_df], ignore_index=True)
+            new_result_df = pd.concat(
+                [original_result_df, result_df], ignore_index=True
+            )
             new_result_df.to_csv(
-            result_file, 
-            encoding="utf-8-sig", 
-            index=False,
+                result_file,
+                encoding="utf-8-sig",
+                index=False,
             )
         else:
             result_df.to_csv(
-            result_file, 
-            encoding="utf-8-sig", 
-            index=False,
+                result_file,
+                encoding="utf-8-sig",
+                index=False,
             )
 
-        fig, ax = plt.subplots(figsize=(10,12))
+        fig, ax = plt.subplots(figsize=(10, 12))
         plot_importance(model, ax=ax)
         if not os.path.exists(plt_save_path):
             os.makedirs(plt_save_path)
         plt.savefig(f"{plt_save_path}/num_folds{num_folds}-rmse{avg_rmse}.png")
 
     def test(
-        self, 
+        self,
         data: pd.DataFrame,
         submission_save_path: str,
         submission_save_name: str,
     ) -> None:
         pred_mean = np.zeros((len(data),))
-        for model_file in (tqdm(os.listdir(self.model_save_path))):
+        for model_file in tqdm(os.listdir(self.model_save_path)):
             model = xgb.XGBRegressor()
             model.load_model(f"{self.model_save_path}/{model_file}")
             pred = model.predict(data) / len((os.listdir(self.model_save_path)))
@@ -122,4 +136,6 @@ class XGBArchitecture():
         submission = pd.DataFrame(pred_mean.astype(int), columns=["target"])
         if not os.path.exists(submission_save_path):
             os.makedirs(submission_save_path)
-        submission.to_csv(f"{submission_save_path}/{submission_save_name}.csv", index=False)
+        submission.to_csv(
+            f"{submission_save_path}/{submission_save_name}.csv", index=False
+        )
