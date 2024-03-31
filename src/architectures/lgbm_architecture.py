@@ -1,6 +1,7 @@
 import os
 import json
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -19,7 +20,7 @@ from wandb.lightgbm import wandb_callback, log_summary
 import matplotlib.pyplot as plt
 
 
-class LGBMArchitecture():
+class LGBMArchitecture:
     def __init__(
         self,
         run_name: str,
@@ -31,10 +32,10 @@ class LGBMArchitecture():
         self.result_summary_path = result_summary_path
 
     def train(
-        self, 
+        self,
         data: pd.DataFrame,
         label: pd.Series,
-        num_folds: int, 
+        num_folds: int,
         seed: int,
         is_tuned: str,
         hparams_save_path: str,
@@ -42,7 +43,9 @@ class LGBMArchitecture():
     ) -> None:
         kf = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=seed)
         if is_tuned == "tuned":
-            params = json.load(open(f"{hparams_save_path}/best_params.json", "rt", encoding="UTF-8"))
+            params = json.load(
+                open(f"{hparams_save_path}/best_params.json", "rt", encoding="UTF-8")
+            )
             params["verbose"] = -1
         elif is_tuned == "untuned":
             params = {
@@ -54,7 +57,9 @@ class LGBMArchitecture():
         else:
             raise ValueError(f"Invalid is_tuned argument: {is_tuned}")
 
-        wandb.init(project="UpStageHousePrice", entity="DimensionSTP", name=self.run_name)
+        wandb.init(
+            project="UpStageHousePrice", entity="DimensionSTP", name=self.run_name
+        )
 
         rmses = []
         for i, idx in enumerate(tqdm(kf.split(data, label))):
@@ -96,37 +101,41 @@ class LGBMArchitecture():
         result_file = f"{self.result_summary_path}/result_summary.csv"
         if os.path.isfile(result_file):
             original_result_df = pd.read_csv(result_file)
-            new_result_df = pd.concat([original_result_df, result_df], ignore_index=True)
+            new_result_df = pd.concat(
+                [original_result_df, result_df], ignore_index=True
+            )
             new_result_df.to_csv(
-            result_file, 
-            encoding="utf-8-sig", 
-            index=False,
+                result_file,
+                encoding="utf-8-sig",
+                index=False,
             )
         else:
             result_df.to_csv(
-            result_file, 
-            encoding="utf-8-sig", 
-            index=False,
+                result_file,
+                encoding="utf-8-sig",
+                index=False,
             )
 
-        fig, ax = plt.subplots(figsize=(10,12))
+        fig, ax = plt.subplots(figsize=(10, 12))
         plot_importance(model, ax=ax)
         if not os.path.exists(plt_save_path):
             os.makedirs(plt_save_path)
         plt.savefig(f"{plt_save_path}/num_folds{num_folds}-rmse{avg_rmse}.png")
 
     def test(
-        self, 
+        self,
         data: pd.DataFrame,
         submission_save_path: str,
         submission_save_name: str,
     ) -> None:
         pred_mean = np.zeros((len(data),))
-        for model_file in (tqdm(os.listdir(self.model_save_path))):
+        for model_file in tqdm(os.listdir(self.model_save_path)):
             model = lgb.Booster(model_file=f"{self.model_save_path}/{model_file}")
             pred = model.predict(data) / len((os.listdir(self.model_save_path)))
             pred_mean += pred
         submission = pd.DataFrame(pred_mean.astype(int), columns=["target"])
         if not os.path.exists(submission_save_path):
             os.makedirs(submission_save_path)
-        submission.to_csv(f"{submission_save_path}/{submission_save_name}.csv", index=False)
+        submission.to_csv(
+            f"{submission_save_path}/{submission_save_name}.csv", index=False
+        )
