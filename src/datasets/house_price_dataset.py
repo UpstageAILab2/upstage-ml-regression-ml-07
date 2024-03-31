@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 
-class HousePriceDataset():
+class HousePriceDataset:
     def __init__(
         self,
         mode: str,
@@ -39,7 +39,18 @@ class HousePriceDataset():
         self,
         dataset: pd.DataFrame,
     ) -> pd.DataFrame:
-        dataset.columns = [column.replace("㎡", "").replace("'", "").replace('"', "").replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace(":", "").replace(",", "") for column in dataset.columns]
+        dataset.columns = [
+            column.replace("㎡", "")
+            .replace("'", "")
+            .replace('"', "")
+            .replace("{", "")
+            .replace("}", "")
+            .replace("[", "")
+            .replace("]", "")
+            .replace(":", "")
+            .replace(",", "")
+            for column in dataset.columns
+        ]
 
         dataset["등기신청일자"] = dataset["등기신청일자"].replace(" ", np.nan)
         dataset["거래유형"] = dataset["거래유형"].replace("-", np.nan)
@@ -67,7 +78,9 @@ class HousePriceDataset():
         dataset: pd.DataFrame,
     ) -> pd.DataFrame:
         continuous_columns, categorical_columns = self.get_columns_by_types(dataset)
-        dataset[continuous_columns] = dataset[continuous_columns].interpolate(method="linear", axis=0)
+        dataset[continuous_columns] = dataset[continuous_columns].interpolate(
+            method="linear", axis=0
+        )
         dataset[categorical_columns] = dataset[categorical_columns].fillna("NULL")
         return dataset
 
