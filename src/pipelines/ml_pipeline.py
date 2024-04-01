@@ -4,6 +4,8 @@ from omegaconf import DictConfig
 from hydra.utils import instantiate
 
 from ..utils.ml_setup import MLSetUp
+
+from ..tuners.cb_tuner import CBTuner
 from ..tuners.lgbm_tuner import LGBMTuner
 from ..tuners.xgb_tuner import XGBTuner
 
@@ -52,7 +54,7 @@ def tune(
     dataset = ml_setup.get_dataset()
 
     data, label = dataset()
-    tuner: Union[LGBMTuner, XGBTuner] = instantiate(
+    tuner: Union[LGBMTuner, XGBTuner, CBTuner] = instantiate(
         config.tuner, data=data, label=label
     )
     tuner()
