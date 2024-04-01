@@ -3,3 +3,4 @@ mode: ${mode}
 dataset_name: ${dataset_name}
 df_path: ${connected_dir}/data
 label_column_name: ${label_column_name}
+scale: ${scale}

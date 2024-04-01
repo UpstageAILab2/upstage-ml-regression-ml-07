@@ -14,6 +14,7 @@ model_name: LightGBM
 dataset_name: HousePrice
 mode: train
 label_column_name: target
+scale: unscale
 num_folds: 5
 
 is_tuned: untuned
