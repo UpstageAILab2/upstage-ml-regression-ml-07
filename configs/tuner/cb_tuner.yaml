@@ -2,23 +2,56 @@ _target_: src.tuners.cb_tuner.CBTuner
 hparams:
   objective: RMSE
   loss_function: RMSE
-  boosting_type: 
-    - Ordered
-    - Plain
-  learning_rate:
-    low: 0.0001
-    high: 0.1
-    log: True
-  n_estimators:
+  iterations:
     low: 8
     high: 1024
     step: 1
+  learning_rate:
+    low: 0.0001
+    high: 1.0
     log: True
-  min_child_samples:
+  depth:
+    low: 1
+    high: 10
+  l2_leaf_reg:
+    low: 1
+    high: 10
+    log: True
+  model_size_reg:
+    low: 0.1
+    high: 10.0
+    log: True
+  rsm:
+    low: 0.1
+    high: 1.0
+  subsample:
+    low: 0.1
+    high: 1.0
+  border_count:
+    low: 32
+    high: 255
+  feature_border_type:
+    - Median
+    - Uniform
+    - UniformAndQuantiles
+    - MaxLogSum
+    - MinEntropy
+    - GreedyLogSum
+  bootstrap_type:
+    - Bayesian
+    - Bernoulli
+    - MVS
+  grow_policy:
+    - SymmetricTree
+    - Lossguide
+    - Depthwise
+  leaf_estimation_method:
+    - Newton
+    - Gradient
+  random_strength:
     low: 1
     high: 100
-    log: False
-  subsample:
+  bagging_temperature:
     low: 0.1
     high: 1.0
 split_size: ${split_size}

@@ -4,6 +4,8 @@ from typing import Dict, Any, Tuple
 import json
 import warnings
 
+from omegaconf import DictConfig
+
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -22,7 +24,7 @@ from optuna.pruners import HyperbandPruner
 class CBTuner:
     def __init__(
         self,
-        hparams: Dict[str, Any],
+        hparams: DictConfig,
         data: pd.DataFrame,
         label: pd.Series,
         split_size: float,
@@ -81,50 +83,78 @@ class CBTuner:
         self,
         trial: optuna.trial.Trial,
     ) -> float:
-        params = dict()
-        params["random_seed"] = self.seed
-        if self.hparams.objective:
-            params["objective"] = self.hparams.objective
-        if self.hparams.loss_function:
-            params["loss_function"] = self.hparams.loss_function
-        if self.hparams.boosting_type:
-            params["boosting_type"] = trial.suggest_categorical(
-                name="boosting_type",
-                choices=self.hparams.boosting_type,
-            )
-        if self.hparams.learning_rate:
-            params["learning_rate"] = trial.suggest_float(
-                name="learning_rate",
-                low=self.hparams.learning_rate.low,
-                high=self.hparams.learning_rate.high,
+        params = {
+            "iterations": trial.suggest_int(
+                "iterations",
+                self.hparams.iterations.low,
+                self.hparams.iterations.high,
+                step=self.hparams.iterations.step,
+            ),
+            "learning_rate": trial.suggest_float(
+                "learning_rate",
+                self.hparams.learning_rate.low,
+                self.hparams.learning_rate.high,
                 log=self.hparams.learning_rate.log,
-            )
-        if self.hparams.n_estimators:
-            params["n_estimators"] = trial.suggest_int(
-                name="n_estimators",
-                low=self.hparams.n_estimators.low,
-                high=self.hparams.n_estimators.high,
-                log=self.hparams.n_estimators.log,
-            )
-        if self.hparams.min_child_samples:
-            params["min_child_samples"] = trial.suggest_int(
-                name="min_child_samples",
-                low=self.hparams.min_child_samples.low,
-                high=self.hparams.min_child_samples.high,
-                log=self.hparams.min_child_samples.log,
-            )
-        if self.hparams.subsample:
-            params["subsample"] = trial.suggest_uniform(
-                name="subsample",
-                low=self.hparams.subsample.low,
-                high=self.hparams.subsample.high,
-            )
+            ),
+            "depth": trial.suggest_int(
+                "depth", self.hparams.depth.low, self.hparams.depth.high
+            ),
+            "l2_leaf_reg": trial.suggest_float(
+                "l2_leaf_reg",
+                self.hparams.l2_leaf_reg.low,
+                self.hparams.l2_leaf_reg.high,
+                log=self.hparams.l2_leaf_reg.log,
+            ),
+            "model_size_reg": trial.suggest_float(
+                "model_size_reg",
+                self.hparams.model_size_reg.low,
+                self.hparams.model_size_reg.high,
+                log=self.hparams.model_size_reg.log,
+            ),
+            "rsm": trial.suggest_float(
+                "rsm", self.hparams.rsm.low, self.hparams.rsm.high
+            ),
+            "subsample": trial.suggest_float(
+                "subsample", self.hparams.subsample.low, self.hparams.subsample.high
+            ),
+            "border_count": trial.suggest_int(
+                "border_count",
+                self.hparams.border_count.low,
+                self.hparams.border_count.high,
+            ),
+            "feature_border_type": trial.suggest_categorical(
+                "feature_border_type", self.hparams.feature_border_type
+            ),
+            "bootstrap_type": trial.suggest_categorical(
+                "bootstrap_type", self.hparams.bootstrap_type
+            ),
+            "grow_policy": trial.suggest_categorical(
+                "grow_policy", self.hparams.grow_policy
+            ),
+            "leaf_estimation_method": trial.suggest_categorical(
+                "leaf_estimation_method", self.hparams.leaf_estimation_method
+            ),
+            "random_strength": trial.suggest_int(
+                "random_strength",
+                self.hparams.random_strength.low,
+                self.hparams.random_strength.high,
+            ),
+            "bagging_temperature": trial.suggest_float(
+                "bagging_temperature",
+                self.hparams.bagging_temperature.low,
+                self.hparams.bagging_temperature.high,
+            ),
+        }
+
+        if params["bootstrap_type"] == "Bayesian":
+            del params["subsample"]
+
         train_data, val_data, train_label, val_label = self.get_split_dataset()
 
         model = cb.CatBoostRegressor(**params)
 
         model.fit(train_data, train_label)
-
         pred = model.predict(val_data)
-        score = np.sqrt(mean_squared_error(val_label, pred))
+        score: float = np.sqrt(mean_squared_error(val_label, pred)).item()
+
         return score
