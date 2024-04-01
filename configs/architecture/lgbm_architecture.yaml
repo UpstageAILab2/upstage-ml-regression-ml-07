@@ -2,3 +2,6 @@ _target_: src.architectures.lgbm_architecture.LGBMArchitecture
 run_name: ${run_name}
 model_save_path: ${model_save_path}
 result_summary_path: ${result_summary_path}
+
+wandb_project: ${oc.env:WANDB_PROJECT}
+wandb_entity: ${oc.env:WANDB_ENTITY}

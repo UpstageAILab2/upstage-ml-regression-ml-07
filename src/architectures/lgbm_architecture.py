@@ -26,10 +26,15 @@ class LGBMArchitecture:
         run_name: str,
         model_save_path: str,
         result_summary_path: str,
+        wandb_project: str,
+        wandb_entity: str,
     ) -> None:
         self.run_name = run_name
         self.model_save_path = model_save_path
         self.result_summary_path = result_summary_path
+
+        self.wandb_project = wandb_project
+        self.wandb_entity = wandb_entity
 
     def train(
         self,
@@ -58,7 +63,7 @@ class LGBMArchitecture:
             raise ValueError(f"Invalid is_tuned argument: {is_tuned}")
 
         wandb.init(
-            project="UpStageHousePrice", entity="DimensionSTP", name=self.run_name
+            project=self.wandb_project, entity=self.wandb_entity, name=self.run_name
         )
 
         rmses = []

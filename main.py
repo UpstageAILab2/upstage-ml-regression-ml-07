@@ -1,7 +1,10 @@
+import dotenv
 from omegaconf import DictConfig
 import hydra
 
 from src.pipelines.ml_pipeline import train, test, tune
+
+dotenv.load_dotenv(override=True)
 
 
 @hydra.main(config_path="configs/", config_name="lgbm.yaml")
