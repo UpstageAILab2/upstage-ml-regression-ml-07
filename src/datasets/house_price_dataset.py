@@ -3,6 +3,7 @@ from typing import Tuple, List
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
 class HousePriceDataset:
@@ -12,17 +13,18 @@ class HousePriceDataset:
         dataset_name: str,
         df_path: str,
         label_column_name: str,
+        scale: str,
     ) -> None:
         self.mode = mode
         self.dataset_name = dataset_name
         self.df_path = df_path
         self.label_column_name = label_column_name
+        self.scale = scale
 
     def __call__(self) -> Tuple[pd.DataFrame, pd.Series]:
         dataset = self.load_dataset()
         dataset = self.preprocess_certain_features(dataset)
         dataset = self.interpolate_dataset(dataset)
-        dataset = self.encode_categorical_features(dataset)
         data, label = self.get_preprocessed_dataset(dataset)
         return (data, label)
 
@@ -51,13 +53,6 @@ class HousePriceDataset:
             .replace(",", "")
             for column in dataset.columns
         ]
-
-        dataset["등기신청일자"] = dataset["등기신청일자"].replace(" ", np.nan)
-        dataset["거래유형"] = dataset["거래유형"].replace("-", np.nan)
-        dataset["중개사소재지"] = dataset["중개사소재지"].replace("-", np.nan)
-
-        dataset["본번"] = dataset["본번"].astype(str)
-        dataset["부번"] = dataset["부번"].astype(str)
         return dataset
 
     def get_columns_by_types(
@@ -106,4 +101,17 @@ class HousePriceDataset:
             label = 0
         else:
             raise ValueError(f"Invalid execution mode: {self.mode}")
+
+        if self.scale == "unscale":
+            pass
+        elif self.scale == "standard":
+            scaler = StandardScaler()
+            scaled_data = scaler.fit_transform(data)
+            data = pd.DataFrame(scaled_data, columns=data.columns)
+        elif self.scale == "min-max":
+            scaler = MinMaxScaler()
+            scaled_data = scaler.fit_transform(data)
+            data = pd.DataFrame(scaled_data, columns=data.columns)
+        else:
+            raise ValueError(f"Invalid execution scale: {self.scale}")
         return (data, label)
