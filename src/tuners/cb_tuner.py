@@ -148,6 +148,8 @@ class CBTuner:
 
         if params["bootstrap_type"] == "Bayesian":
             del params["subsample"]
+        else:
+            del params["bagging_temperature"]
 
         train_data, val_data, train_label, val_label = self.get_split_dataset()
 
