@@ -2,6 +2,7 @@ import os
 from typing import Dict, Any, Tuple
 import json
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -17,7 +18,7 @@ from optuna.samplers import TPESampler
 from optuna.pruners import HyperbandPruner
 
 
-class XGBTuner():
+class XGBTuner:
     def __init__(
         self,
         hparams: Dict[str, Any],
@@ -42,7 +43,11 @@ class XGBTuner():
 
     def __call__(self) -> None:
         if self.tuning_way == "original":
-            study=optuna.create_study(direction="minimize", sampler=TPESampler(seed=self.seed), pruner=HyperbandPruner())
+            study = optuna.create_study(
+                direction="minimize",
+                sampler=TPESampler(seed=self.seed),
+                pruner=HyperbandPruner(),
+            )
             study.optimize(self.optuna_objective, n_trials=self.num_trials)
             trial = study.best_trial
             best_score = trial.value
@@ -59,10 +64,12 @@ class XGBTuner():
         with open(f"{self.hparams_save_path}/best_params.json", "w") as json_file:
             json.dump(best_params, json_file)
 
-    def get_split_dataset(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    def get_split_dataset(
+        self,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
         train_data, val_data, train_label, val_label = train_test_split(
-            self.data, 
-            self.label, 
+            self.data,
+            self.label,
             test_size=self.split_size,
             random_state=self.seed,
             shuffle=True,

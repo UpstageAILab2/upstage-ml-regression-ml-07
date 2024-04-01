@@ -8,7 +8,9 @@ dotenv.load_dotenv(override=True)
 
 
 @hydra.main(config_path="configs/", config_name="lgbm.yaml")
-def main(config: DictConfig,) -> None:
+def main(
+    config: DictConfig,
+) -> None:
     if config.mode == "train":
         return train(config)
     elif config.mode == "test":

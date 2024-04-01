@@ -17,5 +17,7 @@ class MLSetUp:
         return dataset
 
     def get_architecture(self) -> Union[LGBMArchitecture, XGBArchitecture]:
-        architecture: Union[LGBMArchitecture, XGBArchitecture] = instantiate(self.config.architecture)
+        architecture: Union[LGBMArchitecture, XGBArchitecture] = instantiate(
+            self.config.architecture
+        )
         return architecture
