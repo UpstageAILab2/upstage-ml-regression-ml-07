@@ -1,6 +1,5 @@
 import os
-from re import I
-from typing import Dict, Any, Tuple
+from typing import Tuple
 import json
 import warnings
 
@@ -11,7 +10,7 @@ warnings.filterwarnings("ignore")
 import numpy as np
 import pandas as pd
 
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 import catboost as cb
@@ -19,6 +18,7 @@ import catboost as cb
 import optuna
 from optuna.samplers import TPESampler
 from optuna.pruners import HyperbandPruner
+from typing import List
 
 
 class CBTuner:
@@ -66,6 +66,14 @@ class CBTuner:
 
         with open(f"{self.hparams_save_path}/best_params.json", "w") as json_file:
             json.dump(best_params, json_file)
+
+    @property
+    def cat_features(self) -> List[str]:
+        return [
+            column
+            for column in self.data.columns
+            if self.data[column].dtype == "object"
+        ]
 
     def get_split_dataset(
         self,
@@ -155,7 +163,7 @@ class CBTuner:
 
         model = cb.CatBoostRegressor(**params)
 
-        model.fit(train_data, train_label)
+        model.fit(train_data, train_label, cat_features=self.cat_features)
         pred = model.predict(val_data)
         score: float = np.sqrt(mean_squared_error(val_label, pred)).item()
 

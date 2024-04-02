@@ -45,6 +45,10 @@ class CBArchitecture:
         hparams_save_path: str,
         plt_save_path: str,
     ) -> None:
+        cat_features = [
+            column for column in data.columns if data[column].dtype == "object"
+        ]
+
         kf = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=seed)
         if is_tuned == "tuned":
             params = json.load(
@@ -72,7 +76,12 @@ class CBArchitecture:
             train_data, train_label = data.loc[idx[0]], label.loc[idx[0]]
             val_data, val_label = data.loc[idx[1]], label.loc[idx[1]]
 
-            model.fit(train_data, train_label, callbacks=[WandbCallback()])
+            model.fit(
+                train_data,
+                train_label,
+                cat_features=cat_features,
+                callbacks=[WandbCallback()],
+            )
 
             if not os.path.exists(self.model_save_path):
                 os.makedirs(self.model_save_path)
